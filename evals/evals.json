@@ -1,0 +1,51 @@
+{
+  "skill_name": "faultkit",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Review /home/cx/code/ai-resilience-workspace/fixtures/coldchain-dispatch-agent for resilience. I want to know where it can fail silently, what the business invariant is, and what the smallest fix would be. Do not change any code.",
+      "expected_output": "A report that names the ledger write as the irreversible boundary, states an invariant over the ledger (no dispatch when the route breaches its approved limits), classifies the failure as a valid-but-wrong 200, points at agent.py:273 where the policy result is ignored in unsafe mode, and proposes a fail-closed guard next to the write.",
+      "files": [],
+      "assertions": [
+        "Report names the ledger write (DispatchLedger.record) as the irreversible boundary, with a file:line",
+        "Report states the invariant over the ledger / dispatch record, not over the model's output or reasoning",
+        "Report cites agent.py:273 (should_dispatch = mode == 'unsafe' or not violations) as the fail-open bypass",
+        "Report classifies the failure as shape S1 / valid-but-wrong (HTTP 200, schema-valid, policy-violating)",
+        "Report contains a proof plan naming both a gate test and a faultkit scenario (builtin name or 'custom' with host and path)",
+        "Report is at most 120 lines long",
+        "No file under the fixture directory was created, modified, or deleted"
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "In /home/cx/code/ai-resilience-workspace/fixtures/collections-agent, prove with faultkit that a paid invoice can never be sent to collections. There is no faultkit scenario and there are no tests yet. Use faultkit from /home/cx/code/faultkit/bin/faultkit. Run only against the local mock ERP.",
+      "expected_output": "A scenario file matching host * and path /payments* that returns a 200 replica snapshot without PAY-9127, a pytest gate asserting on the ledger with a SILENT FAILURE message, a forward-proxy faultkit run whose report shows faults fired > 0, and a proof block reporting 'silent failure confirmed' for unsafe mode and 'invariant proven' for guarded mode.",
+      "files": [],
+      "assertions": [
+        "A scenario YAML exists whose match uses host '*' or 127.0.0.1 and a path beginning with /payments",
+        "The scenario's synthetic response is HTTP 200 with source 'replica' (or an as_of older than 15 minutes) and does not contain PAY-9127",
+        "Exactly one scenario file was created (one invariant, one scenario)",
+        "A pytest gate exists that asserts on the ledger entries and whose failure message contains 'SILENT FAILURE'",
+        "A faultkit --report JSON exists with at least one event where fired is true",
+        "The summary or output reports the string 'silent failure confirmed' for the unsafe mode run",
+        "The summary or output reports the string 'invariant proven under fault' for the guarded mode run",
+        "No fixture data, scenario probability, or assertion was changed to make a run pass"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Use faultkit (binary at /home/cx/code/faultkit/bin/faultkit) on /home/cx/code/ai-resilience-workspace/fixtures/support-triage-agent to show that a ticket the model never classified is still auto-routed with an SLA. It is a Node project. Produce whatever scenario and test you need and run it locally.",
+      "expected_output": "Recognizes that Node's fetch ignores proxy env and uses --base-url with a provider host (api.openai.com); a 503 scenario with a short Retry-After rather than the 30-second builtin; a node:test gate whose failure message starts with SILENT FAILURE; a run reporting faults fired > 0 and the proof state.",
+      "files": [],
+      "assertions": [
+        "faultkit was run with --base-url",
+        "The scenario match host is api.openai.com",
+        "The scenario sets Retry-After to a value below 5 seconds (or omits it), not the builtin 30",
+        "A node:test file exists whose failure message contains 'SILENT FAILURE' and asserts on the stored ticket record",
+        "The gate passes without faultkit (it does not skip) and fails under the fault",
+        "The summary or output reports faults fired greater than zero",
+        "The summary or output contains a proof block with one of the three proof-state strings"
+      ]
+    }
+  ]
+}

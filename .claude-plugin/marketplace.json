@@ -1,0 +1,11 @@
+{
+  "name": "faultkit",
+  "owner": { "name": "faultkit" },
+  "plugins": [
+    {
+      "name": "faultkit",
+      "source": "./",
+      "description": "Find the silent failures in AI workflows from business invariants, harden the action boundary, and prove it with faultkit."
+    }
+  ]
+}
